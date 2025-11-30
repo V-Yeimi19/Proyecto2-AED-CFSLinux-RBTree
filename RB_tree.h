@@ -24,6 +24,7 @@ template<typename T>
 class RB_tree {
 private:
     Node<T>* root;
+    Node<T>* leftmost; // Cache del nodo más a la izquierda (mínimo)
 
     // Complejidad: O(1) - operaciones de punteros constantes
     void left_rotation(Node<T>* x) {
@@ -251,12 +252,14 @@ public:
     // Complejidad: O(1) - inicialización simple
     RB_tree() {
         root = nullptr;
+        leftmost = nullptr;
     }
 
     // Complejidad: O(1) - creación de un solo nodo
     RB_tree(T key) {
         root = new Node<T>(key);
         root->color = false; // Raíz siempre negra
+        leftmost = root; // El único nodo es el mínimo
     }
 
     // Complejidad: O(n) - el destructor de Node elimina recursivamente todos los nodos
@@ -281,8 +284,13 @@ public:
         new_node->parent = parent;
         if (parent == nullptr) {
             root = new_node;
+            leftmost = new_node; // Primer nodo es el mínimo
         } else if (new_node->key < parent->key) {
             parent->left = new_node;
+            // Actualizar leftmost si insertamos un nuevo mínimo
+            if (leftmost == nullptr || new_node->key < leftmost->key) {
+                leftmost = new_node;
+            }
         } else {
             parent->right = new_node;
         }
@@ -295,6 +303,10 @@ public:
     bool delete_leaf(T key) {
         Node<T>* z = find_node(key); // O(log n)
         if (z == nullptr) return false;
+        
+        // Si estamos eliminando el leftmost, necesitamos actualizar el cache
+        bool deleting_leftmost = (z == leftmost);
+        
         Node<T>* y = z;
         Node<T>* x;
         Node<T>* x_parent;
@@ -324,6 +336,16 @@ public:
             y->left->parent = y;
             y->color = z->color;
         }
+        
+        // Actualizar leftmost si eliminamos el nodo mínimo
+        if (deleting_leftmost) {
+            if (root == nullptr) {
+                leftmost = nullptr;
+            } else {
+                leftmost = minimum(root); // O(log n) - solo cuando eliminamos el mínimo
+            }
+        }
+        
         z->left = nullptr;
         z->right = nullptr;
         delete z;
@@ -392,9 +414,10 @@ public:
         return root;
     }
 
+    // Complejidad: O(1) - acceso directo al cache leftmost
+    // Optimización: en lugar de O(log n) recorriendo el árbol
     Node<T>* get_min_node() {
-        if (root == nullptr) return nullptr;
-        return minimum(root);
+        return leftmost;
     }
 };
 #endif // RB_TREE_H
