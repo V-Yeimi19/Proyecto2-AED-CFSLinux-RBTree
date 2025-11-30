@@ -121,9 +121,15 @@ public:
             if (min_node) {
                 current_process = new Process(min_node->key);
                 rbtree.delete_leaf(min_node->key);
-                if (current_process->vruntime > min_vruntime) {
-                    min_vruntime = current_process->vruntime;
+                
+                // Actualizar min_vruntime: debe ser el mínimo global
+                // Entre el proceso actual y el leftmost del árbol
+                min_vruntime = current_process->vruntime;
+                Node<Process>* new_min_node = rbtree.get_min_node();
+                if (new_min_node && new_min_node->key.vruntime < min_vruntime) {
+                    min_vruntime = new_min_node->key.vruntime;
                 }
+                
                 // Nuevo time slice para el proceso
                 current_slice_remaining = calculate_time_slice(current_process);
             }
