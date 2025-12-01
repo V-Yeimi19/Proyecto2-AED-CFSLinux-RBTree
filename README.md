@@ -46,13 +46,15 @@ Cada proceso tiene atributos clave:
 
 ## Análisis de Complejidad
 
+Los detalles del cálculo de las complejidades se encuentran en el informe, pero a continuación se presenta brevemente la tabla de complejidades por cada operación del RBTree.
+
 ### Complejidad Temporal
 
 | Operación | Complejidad | Justificación |
 | :--- | :---: | :--- |
-| **Insertar Proceso** | **O(log n)** | Inserción en RB Tree + Rebalanceo (rotaciones O(1)). |
-| **Eliminar Proceso** | **O(log n)** | Eliminación en RB Tree + Rebalanceo. |
-| **Seleccionar Próximo (Pick Next)** | **O(log n)** | Encontrar el mínimo (`get_min_node`) toma O(log n) en el peor caso (altura del árbol).  |
+| **Insertar Proceso** | **O(log n)** | Inserción en RB Tree + Rebalanceo (rotaciones O(1)). Puede requerir actualización del puntero al mínimo. |
+| **Eliminar Proceso** | **O(log n)** | Eliminación en RB Tree + Rebalanceo. Puede requerir actualización del puntero al mínimo. |
+| **Seleccionar Próximo (Pick Next)** | **O(1) amortizado** | El CFS mantiene un puntero al nodo mínimo, lo que le permite un acceso directo en O(1). Sin embargo, el puntero se actualiza durante inserciones/eliminaciones cuando es necesario, distribuyendo el costo O(log n) entre múltiples operaciones. |
 | **Buscar Proceso** | **O(log n)** | Búsqueda binaria en un árbol balanceado. |
 
 Donde **n** es el número de procesos en el sistema (runqueue).
